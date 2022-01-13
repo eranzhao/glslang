@@ -524,12 +524,18 @@ bool DeduceVersionProfile(TInfoSink& infoSink, EShLanguage stage, bool versionNo
         return correct;
     }
 
+    if (stage == EShLangHeader) {
+      version = 500;          // shader model; currently a characteristic of glslang, not the input
+      profile = ECoreProfile; // allow doubles in prototype parsing
+      return correct;
+    }
+  
     // Get a version...
     if (version == 0) {
         version = defaultVersion;
         // infoSink.info.message(EPrefixWarning, "#version: statement missing; use #version on first line of shader");
     }
-
+  
     // Get a good profile...
     if (profile == ENoProfile) {
         if (version == 300 || version == 310 || version == 320) {

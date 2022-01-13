@@ -110,6 +110,7 @@ typedef enum {
     EShLangCallableNV = EShLangCallable,
     EShLangTaskNV,
     EShLangMeshNV,
+    EShLangHeader,
     LAST_ELEMENT_MARKER(EShLangCount),
 } EShLanguage;         // would be better as stage, but this is ancient now
 
@@ -134,6 +135,7 @@ typedef enum : unsigned {
     EShLangCallableNVMask     = EShLangCallableMask,
     EShLangTaskNVMask         = (1 << EShLangTaskNV),
     EShLangMeshNVMask         = (1 << EShLangMeshNV),
+    EShLangHeaderMask         = (1 << EShLangHeader),
     LAST_ELEMENT_MARKER(EShLanguageMaskCount),
 } EShLanguageMask;
 

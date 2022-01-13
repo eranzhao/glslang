@@ -73,40 +73,43 @@ extern "C" {
 }
 
 // Command-line options
-enum TOptions {
+enum TOptions : unsigned long long {
     EOptionNone                 = 0,
-    EOptionIntermediate         = (1 <<  0),
-    EOptionSuppressInfolog      = (1 <<  1),
-    EOptionMemoryLeakMode       = (1 <<  2),
-    EOptionRelaxedErrors        = (1 <<  3),
-    EOptionGiveWarnings         = (1 <<  4),
-    EOptionLinkProgram          = (1 <<  5),
-    EOptionMultiThreaded        = (1 <<  6),
-    EOptionDumpConfig           = (1 <<  7),
-    EOptionDumpReflection       = (1 <<  8),
-    EOptionSuppressWarnings     = (1 <<  9),
-    EOptionDumpVersions         = (1 << 10),
-    EOptionSpv                  = (1 << 11),
-    EOptionHumanReadableSpv     = (1 << 12),
-    EOptionVulkanRules          = (1 << 13),
-    EOptionDefaultDesktop       = (1 << 14),
-    EOptionOutputPreprocessed   = (1 << 15),
-    EOptionOutputHexadecimal    = (1 << 16),
-    EOptionReadHlsl             = (1 << 17),
-    EOptionCascadingErrors      = (1 << 18),
-    EOptionAutoMapBindings      = (1 << 19),
-    EOptionFlattenUniformArrays = (1 << 20),
-    EOptionNoStorageFormat      = (1 << 21),
-    EOptionKeepUncalled         = (1 << 22),
-    EOptionHlslOffsets          = (1 << 23),
-    EOptionHlslIoMapping        = (1 << 24),
-    EOptionAutoMapLocations     = (1 << 25),
-    EOptionDebug                = (1 << 26),
-    EOptionStdin                = (1 << 27),
-    EOptionOptimizeDisable      = (1 << 28),
-    EOptionOptimizeSize         = (1 << 29),
-    EOptionInvertY              = (1 << 30),
-    EOptionDumpBareVersion      = (1 << 31),
+    EOptionIntermediate         = (1ULL <<  0),
+    EOptionSuppressInfolog      = (1ULL <<  1),
+    EOptionMemoryLeakMode       = (1ULL <<  2),
+    EOptionRelaxedErrors        = (1ULL <<  3),
+    EOptionGiveWarnings         = (1ULL <<  4),
+    EOptionLinkProgram          = (1ULL <<  5),
+    EOptionMultiThreaded        = (1ULL <<  6),
+    EOptionDumpConfig           = (1ULL <<  7),
+    EOptionDumpReflection       = (1ULL <<  8),
+    EOptionSuppressWarnings     = (1ULL <<  9),
+    EOptionDumpVersions         = (1ULL << 10),
+    EOptionSpv                  = (1ULL << 11),
+    EOptionHumanReadableSpv     = (1ULL << 12),
+    EOptionVulkanRules          = (1ULL << 13),
+    EOptionDefaultDesktop       = (1ULL << 14),
+    EOptionOutputPreprocessed   = (1ULL << 15),
+    EOptionOutputHexadecimal    = (1ULL << 16),
+    EOptionReadHlsl             = (1ULL << 17),
+    EOptionCascadingErrors      = (1ULL << 18),
+    EOptionAutoMapBindings      = (1ULL << 19),
+    EOptionFlattenUniformArrays = (1ULL << 20),
+    EOptionNoStorageFormat      = (1ULL << 21),
+    EOptionKeepUncalled         = (1ULL << 22),
+    EOptionHlslOffsets          = (1ULL << 23),
+    EOptionHlslIoMapping        = (1ULL << 24),
+    EOptionAutoMapLocations     = (1ULL << 25),
+    EOptionDebug                = (1ULL << 26),
+    EOptionStdin                = (1ULL << 27),
+    EOptionOptimizeDisable      = (1ULL << 28),
+    EOptionOptimizeSize         = (1ULL << 29),
+    EOptionInvertY              = (1ULL << 30),
+    EOptionDumpBareVersion      = (1ULL << 31),
+    EOptionGLSL                 = (1ULL << 32),
+    EOptionHLSL                 = (1ULL << 33),
+    EOptionMSL                  = (1ULL << 34),
 };
 bool targetHlslFunctionality1 = false;
 bool SpvToolsDisassembler = false;
@@ -167,7 +170,7 @@ void ProcessConfigFile()
 }
 
 int ReflectOptions = EShReflectionDefault;
-int Options = 0;
+unsigned long long Options = 0;
 const char* ExecutableName = nullptr;
 const char* binaryFileName = nullptr;
 const char* depencyFileName = nullptr;
@@ -805,6 +808,20 @@ void ProcessArguments(std::vector<std::unique_ptr<glslang::TWorkItem>>& workItem
                         variableName = argv[1];
                         bumpArg();
                         break;
+                    } else if (lowerword == "ast-translate") {
+                        if (argc > 1) {
+                          if (strcmp(argv[1], "glsl") == 0) {
+                            Options |= EOptionGLSL;
+                          } else if (strcmp(argv[1], "hlsl") == 0) {
+                            Options |= EOptionHLSL;
+                          } else if (strcmp(argv[1], "msl") == 0) {
+                            Options |= EOptionMSL;
+                          }
+                          else {
+                            Error("--ast-translate expected one of: glsl, hlsl, msl.");
+                          }
+                        }
+                        bumpArg();
                     } else if (lowerword == "quiet") {
                         beQuiet = true;
                     } else if (lowerword == "depfile") {
@@ -1337,7 +1354,8 @@ void CompileAndLinkShaderUnits(std::vector<ShaderCompUnit> compUnits)
     //
 
     // Link
-    if (! (Options & EOptionOutputPreprocessed) && ! program.link(messages))
+    if ( ! (Options & EOptionGLSL) && ! (Options & EOptionHLSL) && ! (Options & EOptionMSL) &&
+        ! (Options & EOptionOutputPreprocessed) && ! program.link(messages))
         LinkFailed = true;
 
 #ifndef GLSLANG_WEB
@@ -1365,6 +1383,21 @@ void CompileAndLinkShaderUnits(std::vector<ShaderCompUnit> compUnits)
 
     std::vector<std::string> outputFiles;
 
+    // Translate to GLSL.
+    if (Options & EOptionGLSL) {
+      printf("TODO: AST translate to GLSL.\n");
+    }
+    
+    // Translate to HLSL.
+    if (Options & EOptionHLSL) {
+      printf("TODO: AST translate to HLSL.\n");
+    }
+  
+    // Translate to MSL.
+    if (Options & EOptionMSL) {
+      printf("TODO: AST translate to MSL.\n");
+    }
+    
     // Dump SPIR-V
     if (Options & EOptionSpv) {
         if (CompileFailed || LinkFailed)
@@ -1543,7 +1576,7 @@ int singleMain()
     // 1) linking all arguments together, single-threaded, new C++ interface
     // 2) independent arguments, can be tackled by multiple asynchronous threads, for testing thread safety, using the old handle interface
     //
-    if (Options & (EOptionLinkProgram | EOptionOutputPreprocessed)) {
+    if (Options & (EOptionLinkProgram | EOptionOutputPreprocessed | EOptionGLSL | EOptionHLSL | EOptionMSL)) {
         glslang::InitializeProcess();
         glslang::InitializeProcess();  // also test reference counting of users
         glslang::InitializeProcess();  // also test reference counting of users
@@ -1688,6 +1721,12 @@ EShLanguage FindLanguage(const std::string& name, bool parseStageName)
         return EShLangMeshNV;
     else if (stageName == "task")
         return EShLangTaskNV;
+    else if (stageName == "ginc")
+        return EShLangHeader;
+    else if (stageName == "hinc") {
+        Options |= EOptionReadHlsl;
+        return EShLangHeader;
+    }
 
     usage();
     return EShLangVertex;
@@ -1933,6 +1972,8 @@ void usage()
            "                                     * spirv1.3  under --target-env vulkan1.1\n"
            "                                     * spirv1.5  under --target-env vulkan1.2\n"
            "                                    Multiple --target-env can be specified.\n"
+           "  --ast-translate {glsl | hlsl | msl}\n"
+           "                                    Use AST to generate target codes.\n"
            "  --variable-name <name>\n"
            "  --vn <name>                       creates a C header file that contains a\n"
            "                                    uint32_t array named <name>\n"
