@@ -661,6 +661,7 @@ const char* StageName(EShLanguage stage)
     case EShLangMeshNV:         return "mesh";
     case EShLangTaskNV:         return "task";
 #endif
+    case EShLangHeader:         return "header";
     default:                    return "unknown stage";
     }
 }

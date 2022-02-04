@@ -823,8 +823,9 @@ bool HlslGrammar::acceptLayoutQualifierList(TQualifier& qualifier)
 //      | UINT
 //      | BOOL
 //
-bool HlslGrammar::acceptTemplateVecMatBasicType(TBasicType& basicType)
+bool HlslGrammar::acceptTemplateVecMatBasicType(TBasicType& basicType, TPrecisionQualifier& precision)
 {
+    precision = EpqNone;
     switch (peek()) {
     case EHTokFloat:
         basicType = EbtFloat;
@@ -841,6 +842,32 @@ bool HlslGrammar::acceptTemplateVecMatBasicType(TBasicType& basicType)
         break;
     case EHTokBool:
         basicType = EbtBool;
+        break;
+    case EHTokUint64:
+        basicType = EbtUint64;
+        break;
+    case EHTokHalf:
+        basicType = EbtFloat16;
+        break;
+    case EHTokMin16float:
+        basicType = EbtFloat;
+        precision = EpqMedium;
+        break;
+    case EHTokMin10float:
+        basicType = EbtFloat;
+        precision = EpqLow;
+        break;
+    case EHTokMin16int:
+        basicType = EbtInt;
+        precision = EpqMedium;
+        break;
+    case EHTokMin12int:
+        basicType = EbtInt;
+        precision = EpqMedium;
+        break;
+    case EHTokMin16uint:
+        basicType = EbtUint;
+        precision = EpqMedium;
         break;
     default:
         return false;
@@ -867,7 +894,8 @@ bool HlslGrammar::acceptVectorTemplateType(TType& type)
     }
 
     TBasicType basicType;
-    if (! acceptTemplateVecMatBasicType(basicType)) {
+    TPrecisionQualifier precision;
+    if (! acceptTemplateVecMatBasicType(basicType, precision)) {
         expected("scalar type");
         return false;
     }
@@ -891,6 +919,7 @@ bool HlslGrammar::acceptVectorTemplateType(TType& type)
     const int vecSizeI = vecSize->getAsConstantUnion()->getConstArray()[0].getIConst();
 
     new(&type) TType(basicType, EvqTemporary, vecSizeI);
+    type.getQualifier().precision = precision;
 
     if (vecSizeI == 1)
         type.makeVector();
@@ -919,7 +948,8 @@ bool HlslGrammar::acceptMatrixTemplateType(TType& type)
     }
 
     TBasicType basicType;
-    if (! acceptTemplateVecMatBasicType(basicType)) {
+    TPrecisionQualifier precision;
+    if (! acceptTemplateVecMatBasicType(basicType, precision)) {
         expected("scalar type");
         return false;
     }
@@ -959,6 +989,7 @@ bool HlslGrammar::acceptMatrixTemplateType(TType& type)
     new(&type) TType(basicType, EvqTemporary, 0,
                      rows->getAsConstantUnion()->getConstArray()[0].getIConst(),
                      cols->getAsConstantUnion()->getConstArray()[0].getIConst());
+    type.getQualifier().precision = precision;
 
     if (!acceptTokenClass(EHTokRightAngle)) {
         expected("right angle bracket");

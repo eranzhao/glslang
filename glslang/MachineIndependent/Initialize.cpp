@@ -9120,7 +9120,9 @@ void TBuiltIns::identifyBuiltIns(int version, EProfile profile, const SpvVersion
         }
         break;
 #endif
-
+    case EShLangHeader:
+        // TODO(eranzhao): should add built-in shader variables?
+        break;
     default:
         assert(false && "Language not supported");
         break;
@@ -9677,7 +9679,9 @@ void TBuiltIns::identifyBuiltIns(int version, EProfile profile, const SpvVersion
             symbolTable.relateToOperator("subgroupMemoryBarrierShared", EOpSubgroupMemoryBarrierShared);
         }
         break;
-
+    case EShLangHeader:
+        // Should add built-in shader functions?
+        break;
     default:
         assert(false && "Language not supported");
     }

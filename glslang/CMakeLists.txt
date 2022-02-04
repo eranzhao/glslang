@@ -142,6 +142,19 @@ glslang_pch(MachineIndependent MachineIndependent/pch.h)
 target_link_libraries(MachineIndependent PRIVATE OGLCompiler OSDependent GenericCodeGen)
 
 ################################################################################
+# Translator
+################################################################################
+add_library(Translator STATIC
+    Translator/AstToGlsl.h
+    Translator/AstToGlsl.cpp
+    Translator/AstToHlsl.h
+    Translator/AstToHlsl.cpp
+    Translator/AstToMsl.h
+    Translator/AstToMsl.cpp)
+set_property(TARGET Translator PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_property(TARGET Translator PROPERTY FOLDER glslang)
+
+################################################################################
 # glslang
 ################################################################################
 set(GLSLANG_SOURCES
@@ -170,7 +183,7 @@ set_target_properties(glslang PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     VERSION   "${GLSLANG_VERSION}"
     SOVERSION "${GLSLANG_VERSION_MAJOR}")
-target_link_libraries(glslang PRIVATE OGLCompiler OSDependent MachineIndependent)
+target_link_libraries(glslang PRIVATE OGLCompiler OSDependent MachineIndependent Translator)
 target_include_directories(glslang PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
@@ -207,7 +220,7 @@ if(ENABLE_GLSLANG_INSTALL)
                 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
     else()
-        install(TARGETS glslang MachineIndependent GenericCodeGen
+        install(TARGETS glslang MachineIndependent GenericCodeGen Translator
                 EXPORT  glslangTargets
                 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif()

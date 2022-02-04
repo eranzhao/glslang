@@ -68,6 +68,10 @@
 
 #include "glslang/glsl_intrinsic_header.h"
 
+#include "glslang/Translator/AstToGlsl.h"
+#include "glslang/Translator/AstToHlsl.h"
+#include "glslang/Translator/AstToMsl.h"
+
 extern "C" {
     GLSLANG_EXPORT void ShOutputHtml();
 }
@@ -1013,6 +1017,16 @@ void ProcessArguments(std::vector<std::unique_ptr<glslang::TWorkItem>>& workItem
     if ((Options & EOptionReadHlsl) && (Client == glslang::EShClientOpenGL)) {
         Error("Using HLSL input under OpenGL semantics is not currently supported.");
     }
+  
+    if (((Options & EOptionGLSL) || (Options & EOptionHLSL) || (Options & EOptionMSL)) &&
+        (Client == glslang::EShClientOpenGL)) {
+      Error("Using AST translator under OpenGL semantics is not currently supported, use Vulkan instead.");
+    }
+  
+    if (((Options & EOptionGLSL) || (Options & EOptionHLSL) || (Options & EOptionMSL)) &&
+        (Client == glslang::EShClientNone)) {
+      Error("Using AST translator must under Vulkan semantics.");
+    }
 
     // rationalize client and target language
     if (TargetLanguage == glslang::EShTargetNone) {
@@ -1383,23 +1397,33 @@ void CompileAndLinkShaderUnits(std::vector<ShaderCompUnit> compUnits)
 
     std::vector<std::string> outputFiles;
 
-    // Translate to GLSL.
-    if (Options & EOptionGLSL) {
-      printf("TODO: AST translate to GLSL.\n");
-    }
-    
-    // Translate to HLSL.
-    if (Options & EOptionHLSL) {
-      printf("TODO: AST translate to HLSL.\n");
-    }
-  
-    // Translate to MSL.
-    if (Options & EOptionMSL) {
-      printf("TODO: AST translate to MSL.\n");
+    bool astTranslate = false;
+    auto headers = program.getShaders(EShLangHeader);
+    if(headers.size() > 0) {
+      for(auto &header : headers) {
+        // Translate to GLSL.
+        if (Options & EOptionGLSL) {
+          // printf("TODO: AST translate to GLSL.\n");
+          astTranslate = true;
+          glslang::AstToGlsl(*header->getIntermediate(), GetBinaryName(EShLangHeader));
+        }
+        
+        // Translate to HLSL.
+        if (Options & EOptionHLSL) {
+          printf("TODO: AST translate to HLSL.\n");
+          astTranslate = true;
+        }
+      
+        // Translate to MSL.
+        if (Options & EOptionMSL) {
+          printf("TODO: AST translate to MSL.\n");
+          astTranslate = true;
+        }
+      }
     }
     
     // Dump SPIR-V
-    if (Options & EOptionSpv) {
+    if ((Options & EOptionSpv) && (!astTranslate)) {
         if (CompileFailed || LinkFailed)
             printf("SPIR-V is not generated for failed compile or link\n");
         else {

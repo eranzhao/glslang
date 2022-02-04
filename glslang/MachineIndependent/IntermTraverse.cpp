@@ -210,6 +210,7 @@ void TIntermSelection::traverse(TIntermTraverser *it)
             condition->traverse(it);
             if (trueBlock)
                 trueBlock->traverse(it);
+          
             if (falseBlock)
                 falseBlock->traverse(it);
         }

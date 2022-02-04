@@ -349,6 +349,9 @@ bool InitializeSymbolTables(TInfoSink& infoSink, TSymbolTable** commonTable,  TS
     InitializeStageSymbolTable(*builtInParseables, version, profile, spvVersion, EShLangFragment, source,
                                infoSink, commonTable, symbolTables);
 
+    InitializeStageSymbolTable(*builtInParseables, version, profile, spvVersion, EShLangHeader, source,
+                               infoSink, commonTable, symbolTables);
+  
 #ifndef GLSLANG_WEB
     // check for tessellation
     if ((profile != EEsProfile && version >= 150) ||

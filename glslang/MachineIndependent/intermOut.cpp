@@ -214,13 +214,6 @@ bool TOutputTraverser::visitBinary(TVisit /* visit */, TIntermBinary* node)
     case EOpLogicalXor: out.debug << "logical-xor"; break;
     case EOpLogicalAnd: out.debug << "logical-and"; break;
 
-    case EOpAbsDifference:          out.debug << "absoluteDifference";    break;
-    case EOpAddSaturate:            out.debug << "addSaturate";           break;
-    case EOpSubSaturate:            out.debug << "subtractSaturate";      break;
-    case EOpAverage:                out.debug << "average";               break;
-    case EOpAverageRounded:         out.debug << "averageRounded";        break;
-    case EOpMul32x16:               out.debug << "multiply32x16";         break;
-
     default: out.debug << "<unknown op>";
     }
 
@@ -1134,6 +1127,13 @@ bool TOutputTraverser::visitAggregate(TVisit /* visit */, TIntermAggregate* node
 #ifndef GLSLANG_WEB
     case EOpSpirvInst: out.debug << "spirv_instruction"; break;
 #endif
+
+    case EOpAbsDifference:          out.debug << "absoluteDifference";    break;
+    case EOpAddSaturate:            out.debug << "addSaturate";           break;
+    case EOpSubSaturate:            out.debug << "subtractSaturate";      break;
+    case EOpAverage:                out.debug << "average";               break;
+    case EOpAverageRounded:         out.debug << "averageRounded";        break;
+    case EOpMul32x16:               out.debug << "multiply32x16";         break;
 
     default: out.debug.message(EPrefixError, "Bad aggregation op");
     }
